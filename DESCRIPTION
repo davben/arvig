@@ -1,0 +1,21 @@
+Package: rightwingviolence
+Title: Data About Right-Wing Violence in Germany in 2014 and 2015
+Version: 0.0.0.9000
+Authors@R: as.person(c(
+    "David Benček <david.bencek@ifw-kiel.de> [aut, cre]",
+    "Julia Strasheim <julia.strasheim@giga.hamburg> [aut]"
+  ))
+Description: Georeferenced data on Right-Wing violence in Germany in 2014 and 2015.
+Depends: 
+    R (>= 3.2.2)
+License: CC0
+LazyData: true
+Encoding: UTF-8
+Imports: 
+    dplyr,
+    rvest,
+    rgdal
+RoxygenNote: 5.0.0
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

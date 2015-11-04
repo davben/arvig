@@ -1,0 +1,70 @@
+---
+title: "Refugees Welcome\\? Introducing a Georeferenced Event Dataset on Right-Wing Violence in Germany, 2014-2015"
+author: 
+  - "Julia Strasheim"
+  - "David Benček"
+date: "`r Sys.Date()`"
+output:
+    rmarkdown::html_vignette:
+        fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{Refugees Welcome? Introducing a Georeferenced Event Dataset on Right-Wing Violence in Germany, 2014-2015}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+```{r libraries, include=FALSE}
+library(lubridate)
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(rgdal)
+library(tidyr)
+```
+
+## Introduction 
+
+In the summer of 2015, the dominating picture in international media reporting on the influx of refugees to Germany was not of chanting right-wing extremists, but of thousands of Germans who were welcoming incoming refugees at train stations or volunteering in shelters.
+Yet, right-wing violence against refugees as well as attacks against shelters have been on the rise in Germany throughout the past two years, with media reports highlighting that particularly the number of attacks against refugee housing doubled in 2015 compared to 2014 (Deutsche Welle 2015).
+This violence culminated in October 2015 in an attack against Cologne city official Henriette Reker, who was stabbed in the neck over her work with and position towards refugees (The Guardian 2015).
+In light of this escalation, the Federal Criminal Police Office (Bundeskriminalamt, BKA) has warned that violence by right-wing extremists will intensify, and fears that politicians and volunteers who support refugees face increased danger of attack from far right groups (BKA 2015).
+
+The academic literature on violence and social conflict has extensively studied the drivers of right-wing violence against migrants and refugees in Germany (e.g. Koopmans & Olzak 2004; Koopmans 1996; McLaren 1999).
+But due to the lack of systematic data collection there has thus far been no scholarly investigation of the recent surge in right-wing violence, its patters, dynamics, drivers, and consequences.
+This means that the scholarly community is currently unable to investigate if the violence as witnessed in Germany in 2014 and 2015 really does form “a new dimension of violence,” as argued by the Federal Office for the Protection of the Constitution, whose president reasoned inter alia that while right-wing nationalists had in the past demonstrated incentives to present themselves as “Goodie Two Shoes” in front of policemen and women, they are now showing a newfound willingness to brutally attack police forces (Der Spiegel 2015).
+
+To close this gap in the availability of systematic data on the topic, this paper introduces a new georeferenced event dataset on right-wing violence in Germany between 2014 and 2015.
+In total, the dataset identifies XXX events of different forms of right-wing violence, ranging from riots to attacks against property and attacks against persons.
+In the following sections we describe our specific definition and operationalization of right-wing violence, explain the data collection process, and present patterns of right-wing violence across time and space.
+We conclude this paper by discussing potential uses of the dataset in future research.
+
+
+## Defining and Operationalizing Right-Wing Violence
+
+Add some more exorbitant praise of previous literature here, what it lacks, what we add to it, etc.
+
+## Building the Dataset
+```{r data, echo=FALSE, cache=TRUE}
+# event data
+data(events)
+```
+
+## Patterns of Right-Wing Violence in Germany, 2014-2015
+```{r events_plot, echo=FALSE}
+## shapefile
+load("data-raw/germany.Rdata")
+germany_df <- fortify(germany, region="RS")
+
+# plot events on map
+events_plot <- ggplot(germany_df) + 
+  geom_map(map = germany_df, aes(long, lat, map_id = id), fill="#f0f0f0", colour = "black") + 
+  geom_point(data = events, aes(lon, lat, colour = factor(kategorie)), position = "jitter", size=3) +
+  scale_color_brewer(palette = "Accent", name="") +
+  guides(colour = guide_legend(ncol = 2)) +
+  coord_map("vandergrinten") + 
+  theme_bw() +
+  theme(legend.position="bottom")
+
+plot(events_plot)
+```
+
+## Options for Using the Dataset
