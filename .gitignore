@@ -1,6 +1,7 @@
-.Rproj
+*.Rproj
 .Rproj.user
 .Rhistory
 inst/doc
 vignettes/*_cache
 .DS_Store
+._.DS_Store
