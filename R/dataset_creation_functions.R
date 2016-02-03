@@ -33,7 +33,7 @@ extract_from_geocode <- function(x){
 #' @return A data frame of events as listed on the website, consisting of columns for date, location, bundesland,
 #'    category, summary and source.
 read_data <- function(page) {
-  gewalt <- read_html(paste0("https://mut-gegen-rechte-gewalt.de/service/chronik-vorfaelle?&&field_date_value[value]&page=", page))
+  gewalt <- read_html(paste0("https://mut-gegen-rechte-gewalt.de/service/chronik-vorfaelle?&&field_date_value[value][year]=2015&page=", page))
 
   ort <- gewalt %>%
     html_nodes(".field-name-field-city") %>%

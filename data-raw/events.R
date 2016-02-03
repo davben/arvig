@@ -4,7 +4,7 @@ library(rvest)
 library(rgdal)
 
 # events from 2014 --------------------------------------------------------
-load("data-raw-raw/events_2014.Rdata")
+load("data-raw/events_2014.Rdata")
 events_2014 <- colwise(function(x)iconv(x, to = "utf8", from = "latin1"))(events_2014)
 
 events_2014 <- events_2014 %>%
@@ -51,8 +51,8 @@ events_2014 <- tbl_df(cbind(events_2014, geocodes_2014_df))
 # events from 2015 --------------------------------------------------------
 
 # scrape the website (save data for quicker use)
-# events_2015 <- ldply(0:49, read_data)
-# save(events_2015, file = "data-raw/events_2015.Rdata")
+# events_2015 <- ldply(c(0:42, 44:94), read_data, .progress="text")
+# save(events_2015, file = "data-raw/events_2015_Feb-16.Rdata")
 load("data-raw/events_2015.Rdata")
 
 # repair minor issues of concatenated strings and spelling mistakes
@@ -94,4 +94,4 @@ events <- events %>%
   mutate(key = ifelse(ort == "Wismar", "13074", key)) %>% # necessary because the geocoded point is slightly outside the polygon
   select(-id)
 
-save(events, file = "./data/events.Rda")
+#save(events, file = "./data/events.Rda")
