@@ -2,6 +2,7 @@ library(plyr)
 library(dplyr)
 library(rvest)
 library(rgdal)
+library(maptools)
 
 # events from 2014 --------------------------------------------------------
 load("data-raw/events_2014.Rdata")
@@ -34,7 +35,8 @@ events_2014 <- events_2014 %>%
          kategorie = gsub("(A) & (S)", "Brandanschlag & Sonstige Angriffe auf Unterkünfte", kategorie, fixed=TRUE),
          kategorie = gsub("(D) & (S)", "Kundgebung/Demo & Sonstige Angriffe auf Unterkünfte", kategorie, fixed=TRUE),
          kategorie = gsub("(D) & (K)", "Kundgebung/Demo & Tätlicher Übergriff/Körperverletzung", kategorie, fixed=TRUE),
-         kategorie = gsub("(S) & (K)", "Sonstige Angriffe auf Unterkünfte & Tätlicher Übergriff/Körperverletzung", kategorie, fixed=TRUE))
+         kategorie = gsub("(S) & (K)", "Sonstige Angriffe auf Unterkünfte & Tätlicher Übergriff/Körperverletzung", kategorie, fixed=TRUE),
+         quelle = gsub("Quelle: ", "", quelle))
 
 
 ## geocode all events from 2014
@@ -51,27 +53,21 @@ events_2014 <- tbl_df(cbind(events_2014, geocodes_2014_df))
 # events from 2015 --------------------------------------------------------
 
 # scrape the website (save data for quicker use)
-# events_2015 <- ldply(c(0:42, 44:94), read_data, .progress="text")
+# events_2015 <- ldply(c(0:94), read_data, .progress="text")
 # save(events_2015, file = "data-raw/events_2015_Feb-16.Rdata")
-load("data-raw/events_2015.Rdata")
+load("data-raw/events_2015_Feb-16.Rdata")
+events_2015 <- colwise(function(x)iconv(x, from = "utf8", to = "utf8"))(events_2015) # clean up encoding
 
-# repair minor issues of concatenated strings and spelling mistakes
+# separate strings in cases of more than one category per event
 events_2015$kategorie <- gsub("([a-z])([A-Z])","\\1 & \\2", events_2015$kategorie)
-events_2015$quelle <- gsub("([a-z])([A-Z])","\\1 & \\2", events_2015$quelle)
-events_2015$quelle <- gsub("(twitter)"," & \\1", events_2015$quelle)
-events_2015$quelle <- gsub("(rosenheim24\\.de)"," & \\1", events_2015$quelle)
-events_2015$ort <- gsub("Göditz","Gröditz", events_2015$ort, fixed = TRUE)
-events_2015[events_2015$ort == "Zeithain", ]$bundesland <- "Sachsen"
-events_2015[events_2015$ort == "Weiskirchen", ]$bundesland <- "Saarland"
 
 
 ## geocode all events from 2015
 # locations <- paste(events_2015$ort, events_2015$bundesland, sep = ", ")
-# locations <- enc2utf8(locations) # necessary for locations containing umlauts
 # geocodes_2015 <- ggmap::geocode(locations, output = "all", source = "google", nameType = "long")
-# save(geocodes_2015, file = "./data-raw/geocodes_2015.Rdata")
+# save(geocodes_2015, file = "./data-raw/geocodes_2015_Feb-16.Rdata")
 
-load("data-raw/geocodes_2015.Rdata")
+load("data-raw/geocodes_2015_Feb-16.Rdata")
 geocodes_2015_df <- ldply(geocodes_2015, extract_from_geocode)
 events_2015 <- tbl_df(cbind(events_2015, geocodes_2015_df))
 
@@ -87,11 +83,11 @@ load("data-raw/germany.Rdata")
 # assign temporary event ID
 events$id <- 1:nrow(events)
 # map events to subregions of Germany
-keys <- check_polygons(germany, events[ ,c("id", "lon", "lat")], .key = "RS")
+keys <- check_polygons(germany, events[ ,c("id", "lon", "lat")], key = "RS")
 
 events <- events %>%
   left_join(keys, "id") %>%
   mutate(key = ifelse(ort == "Wismar", "13074", key)) %>% # necessary because the geocoded point is slightly outside the polygon
   select(-id)
 
-#save(events, file = "./data/events.Rda")
+#save(events, file = "./data/events_Feb-16.Rda")
