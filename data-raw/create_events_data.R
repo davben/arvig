@@ -54,8 +54,8 @@ events_2014 <- tbl_df(cbind(events_2014, geocodes_2014_df))
 
 # scrape the website (save data for quicker use)
 # events_2015 <- ldply(c(0:94), read_data, .progress="text")
-# save(events_2015, file = "data-raw/events_2015_Feb-16.Rdata")
-load("data-raw/events_2015_Feb-16.Rdata")
+# save(events_2015, file = "data-raw/events_2015.Rdata")
+load("data-raw/events_2015.Rdata")
 events_2015 <- colwise(function(x)iconv(x, from = "utf8", to = "utf8"))(events_2015) # clean up encoding
 
 # separate strings in cases of more than one category per event
@@ -65,9 +65,9 @@ events_2015$kategorie <- gsub("([a-z])([A-Z])","\\1 & \\2", events_2015$kategori
 ## geocode all events from 2015
 # locations <- paste(events_2015$ort, events_2015$bundesland, sep = ", ")
 # geocodes_2015 <- ggmap::geocode(locations, output = "all", source = "google", nameType = "long")
-# save(geocodes_2015, file = "./data-raw/geocodes_2015_Feb-16.Rdata")
+# save(geocodes_2015, file = "./data-raw/geocodes_2015.Rdata")
 
-load("data-raw/geocodes_2015_Feb-16.Rdata")
+load("data-raw/geocodes_2015.Rdata")
 geocodes_2015_df <- ldply(geocodes_2015, extract_from_geocode)
 events_2015 <- tbl_df(cbind(events_2015, geocodes_2015_df))
 
@@ -90,4 +90,4 @@ events <- events %>%
   mutate(key = ifelse(ort == "Wismar", "13074", key)) %>% # necessary because the geocoded point is slightly outside the polygon
   select(-id)
 
-#save(events, file = "./data/events_Feb-16.Rda")
+#save(events, file = "./data/events.Rda")
