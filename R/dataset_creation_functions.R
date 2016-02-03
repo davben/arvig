@@ -44,12 +44,16 @@ read_data <- function(page) {
     html_text()
 
   quelle_raw <- gewalt %>%
-    html_nodes(".field-name-field-source .field-item")
+    html_nodes(".node-chronik-eintrag")
 
   quelle <- sapply(quelle_raw, function(x){
-    links <- html_nodes(x, "a") %>%
+    check <- try(html_nodes(x, ".field-name-field-source .field-item"))
+    if (inherits(check, "try-error") |
+        (length(check)==0)) { return(NA) }
+    links <- html_nodes(check, "a") %>%
       html_attr("href")
-    paste(links, collapse = " \n ")
+    links <- paste(links, collapse = " \n ")
+    return(links)
   })
 
   datum <- gewalt %>%
