@@ -38,6 +38,9 @@ events_2014 <- events_2014 %>%
          kategorie = gsub("(S) & (K)", "Sonstige Angriffe auf Unterkünfte & Tätlicher Übergriff/Körperverletzung", kategorie, fixed=TRUE),
          quelle = gsub("Quelle: ", "", quelle))
 
+# Fix encoding again: even though this script is utf-8, the above substitutions are not.
+events_2014$kategorie <- iconv(events_2014$kategorie, from = "latin1", to = "utf8")
+
 
 ## geocode all events from 2014
 # locations <- paste(events_2014$ort, events_2014$bundesland, sep = ", ")
