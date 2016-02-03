@@ -43,9 +43,14 @@ read_data <- function(page) {
     html_nodes(".field-name-field-bundesland") %>%
     html_text()
 
-  quelle <- gewalt %>%
-    html_nodes(".field-name-field-source .field-item") %>%
-    html_text()
+  quelle_raw <- gewalt %>%
+    html_nodes(".field-name-field-source .field-item")
+
+  quelle <- sapply(quelle_raw, function(x){
+    links <- html_nodes(x, "a") %>%
+      html_attr("href")
+    paste(links, collapse = " \n ")
+  })
 
   datum <- gewalt %>%
     html_nodes(".field-name-field-date") %>%
