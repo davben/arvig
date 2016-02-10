@@ -39,7 +39,9 @@ events_2014 <- events_2014 %>%
          quelle = gsub("Quelle: ", "", quelle))
 
 # Under Windows: Fix encoding again: even though this script is supposed to be utf-8, the above substitutions are not.
-#events_2014$kategorie <- iconv(events_2014$kategorie, from = "latin1", to = "utf8")
+if (.Platform$OS.type == "windows") {
+  events_2014$kategorie <- iconv(events_2014$kategorie, from = "latin1", to = "utf8")
+}
 
 
 ## geocode all events from 2014
@@ -53,6 +55,9 @@ geocodes_2014_df <- ldply(geocodes_2014, extract_from_geocode)
 events_2014 <- tbl_df(cbind(events_2014, geocodes_2014_df))
 
 
+# Due to ambiguity in the documentation of the event, the following observation is excluded:
+events_2014 <- filter(events_2014, !(ort=="Heidenheim"), !(datum=="07.01.2014"))
+
 # events from 2015 --------------------------------------------------------
 
 # scrape the website (save data for quicker use)
@@ -64,6 +69,8 @@ events_2015 <- colwise(function(x)iconv(x, from = "utf8", to = "utf8"))(events_2
 # separate strings in cases of more than one category per event
 events_2015$kategorie <- gsub("([a-z])([A-Z])","\\1 & \\2", events_2015$kategorie)
 
+# Provide additional information for correct geo-coding:
+events_2015[events_2015$datum == "01.09.2015" & events_2015$ort == "Massow", ]$ort <- "Massow (LDS)"
 
 ## geocode all events from 2015
 # locations <- paste(events_2015$ort, events_2015$bundesland, sep = ", ")

@@ -17,10 +17,11 @@ library(rightwingviolence)
 library(lubridate)
 library(plyr)
 library(dplyr)
+library(tidyr)
+library(broom)
 library(ggplot2)
 library(ggthemes)
 library(rgdal)
-library(tidyr)
 library(maptools)
 ```
 
@@ -68,13 +69,13 @@ head(events)
 ```{r events_plot, echo=FALSE, fig.height=18, fig.width=14, out.width=600}
 ## shapefile
 load("../data-raw/germany.Rdata")
-germany_df <- fortify(germany, region="RS")
+germany_df <- tidy(germany, region="RS")
 
 # plot events on map
 events_plot <- ggplot(germany_df) + 
   geom_map(map = germany_df, aes(long, lat, map_id = id), fill="#f4f3f3", colour = "black") + 
   geom_point(data = events, aes(lon, lat, colour = factor(kategorie)), position = "jitter", size=3) +
-  scale_color_brewer(palette = "Dark2", name="") +
+  #scale_color_brewer(palette = "Dark2", name="") +
   guides(colour = guide_legend(ncol = 1)) +
   coord_map("vandergrinten") + 
   theme_map() +
