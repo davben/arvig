@@ -92,7 +92,7 @@ check_polygons <- function(polygon_df, points_df, key, .progress = "text") {
     p <- sp::SpatialPoints(point[ , c("lon", "lat")], proj4string=CRS(proj4string(polygon_df)))
     x <- try(polygon_df[p,], silent=TRUE)
     loc <- ifelse(inherits(x, "try-error"), NA, as.character(x@data[[key]]))
-    return(data_frame(key = loc))
+    return(data_frame(community_id = loc))
   }, .progress = .progress)
   return(result)
 }

@@ -38,8 +38,8 @@ events_2014 <- events_2014 %>%
          kategorie = gsub("(S) & (K)", "Sonstige Angriffe auf Unterkünfte & Tätlicher Übergriff/Körperverletzung", kategorie, fixed=TRUE),
          quelle = gsub("Quelle: ", "", quelle))
 
-# Fix encoding again: even though this script is utf-8, the above substitutions are not.
-events_2014$kategorie <- iconv(events_2014$kategorie, from = "latin1", to = "utf8")
+# Under Windows: Fix encoding again: even though this script is supposed to be utf-8, the above substitutions are not.
+#events_2014$kategorie <- iconv(events_2014$kategorie, from = "latin1", to = "utf8")
 
 
 ## geocode all events from 2014
@@ -81,16 +81,16 @@ events <- rbind(events_2014, events_2015)
 
 # include „Kreisschlüssel“ for each event ---------------------------------
 ## use shapefile to determine the respective "Kreisschlüssel" for each event.
-load("data-raw/germany.Rdata")
+load("data-raw/germany_250.Rdata")
 
 # assign temporary event ID
 events$id <- 1:nrow(events)
 # map events to subregions of Germany
-keys <- check_polygons(germany, events[ ,c("id", "lon", "lat")], key = "RS")
+keys <- check_polygons(germany_250, events[ ,c("id", "lon", "lat")], key = "RS")
 
 events <- events %>%
   left_join(keys, "id") %>%
-  mutate(key = ifelse(ort == "Wismar", "13074", key)) %>% # necessary because the geocoded point is slightly outside the polygon
+  mutate(community_id = ifelse(ort == "Wismar", "130740087087", community_id)) %>% # necessary because the geocoded point is slightly outside the polygon
   select(-id)
 
 #save(events, file = "./data/events.Rda")
