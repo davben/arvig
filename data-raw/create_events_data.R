@@ -38,6 +38,9 @@ events_2014 <- events_2014 %>%
          kategorie = gsub("(S) & (K)", "Sonstige Angriffe auf Unterkünfte & Tätlicher Übergriff/Körperverletzung", kategorie, fixed=TRUE),
          quelle = gsub("Quelle: ", "", quelle))
 
+events_2014[events_2014$datum == "22.01.2014" & events_2015$ort == "Bad Dürheim", ]$ort <- "Bad Dürrheim"
+events_2014[events_2014$datum == "22.01.2014" & events_2015$ort == "Bad Dürrheim", ]$bundesland <- "Baden-Württemberg"
+
 # Under Windows: Fix encoding again: even though this script is supposed to be utf-8, the above substitutions are not.
 if (.Platform$OS.type == "windows") {
   events_2014$kategorie <- iconv(events_2014$kategorie, from = "latin1", to = "utf8")
@@ -46,7 +49,7 @@ if (.Platform$OS.type == "windows") {
 
 ## geocode all events from 2014
 # locations <- paste(events_2014$ort, events_2014$bundesland, sep = ", ")
-# locations <- enc2utf8(locations) # necessary for locations containing umlauts
+## locations <- enc2utf8(locations) # necessary for locations containing umlauts
 # geocodes_2014 <- ggmap::geocode(locations, output = "all", source = "google", nameType = "long")
 # save(geocodes_2014, file = "data-raw/geocodes_2014.Rdata")
 
@@ -99,5 +102,28 @@ events <- events %>%
   left_join(keys, "id") %>%
   mutate(community_id = ifelse(ort == "Wismar", "130740087087", community_id)) %>% # necessary because the geocoded point is slightly outside the polygon
   select(-id)
+
+
+# clean variable names ----------------------------------------------------
+events <- events %>%
+  mutate(date = dmy(datum)) %>%
+  rename(location = ort,
+         state = bundesland,
+         description = zusammenfassung,
+         `source` = quelle,
+         longitude = lon,
+         latitude = lat) %>%
+  mutate(category_en = ifelse(kategorie == "Brandanschlag", "arson",
+                           ifelse(kategorie == "Sonstige Angriffe auf Unterkünfte", "miscellaneous attack",
+                                  ifelse(kategorie == "Kundgebung/Demo", "demonstration",
+                                         ifelse(kategorie == "Tätlicher Übergriff/Körperverletzung", "assault",
+                                                ifelse(kategorie == "Brandanschlag & Sonstige Angriffe auf Unterkünfte", "arson & miscellaneous attack",
+                                                       ifelse(kategorie == "Kundgebung/Demo & Sonstige Angriffe auf Unterkünfte", "demonstration & miscellaneous attack",
+                                                              ifelse(kategorie == "Kundgebung/Demo & Tätlicher Übergriff/Körperverletzung", "demonstration & assault",
+                                                                     ifelse(kategorie == "Sonstige Angriffe auf Unterkünfte & Tätlicher Übergriff/Körperverletzung", "miscellaneous attack & assault",
+                                                                            ifelse(kategorie == "Kundgebung/Demo & Sonstige Angriffe auf Unterkünfte & Tätlicher Übergriff/Körperverletzung", "demonstration & miscellaneous attack & assault", kategorie)))))))))) %>%
+  rename(category_de = kategorie) %>%
+  select(date, location, state, community_id, longitude, latitude, category_de, category_en, description, `source`)
+
 
 #save(events, file = "./data/events.Rda")
