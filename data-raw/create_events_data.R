@@ -3,6 +3,7 @@ library(dplyr)
 library(rvest)
 library(rgdal)
 library(maptools)
+library(lubridate)
 
 # events from 2014 --------------------------------------------------------
 load("data-raw/events_2014.Rdata")
@@ -36,10 +37,23 @@ events_2014 <- events_2014 %>%
          kategorie = gsub("(D) & (S)", "Kundgebung/Demo & Sonstige Angriffe auf Unterkünfte", kategorie, fixed=TRUE),
          kategorie = gsub("(D) & (K)", "Kundgebung/Demo & Tätlicher Übergriff/Körperverletzung", kategorie, fixed=TRUE),
          kategorie = gsub("(S) & (K)", "Sonstige Angriffe auf Unterkünfte & Tätlicher Übergriff/Körperverletzung", kategorie, fixed=TRUE),
+         ort = gsub("Sangershausen", "Sangerhausen", ort, fixed=TRUE),
+         ort = gsub("Heidenheim a.d. Brenz", "Heidenheim (Brenz)", ort, fixed=TRUE),
          quelle = gsub("Quelle: ", "", quelle))
 
-events_2014[events_2014$datum == "22.01.2014" & events_2015$ort == "Bad Dürheim", ]$ort <- "Bad Dürrheim"
-events_2014[events_2014$datum == "22.01.2014" & events_2015$ort == "Bad Dürrheim", ]$bundesland <- "Baden-Württemberg"
+events_2014[events_2014$datum == "22.01.2014" & events_2014$ort == "Bad Dürheim", ]$ort <- "Bad Dürrheim"
+events_2014[events_2014$datum == "22.01.2014" & events_2014$ort == "Bad Dürrheim", ]$bundesland <- "Baden-Württemberg"
+
+events_2014[events_2014$datum == "28.11.2014" & events_2014$ort == "Heiden", ]$ort <- "Heidenau"
+
+duplicate <- events_2014[events_2014$ort=="Essen und Duisburg", ]
+events_2014 <- rbind(events_2014, duplicate)
+events_2014[events_2014$ort=="Essen und Duisburg", ]$ort <- c("Essen", "Duisburg")
+
+duplicate <- events_2014[events_2014$ort=="Gelsenkirchen und Witten", ]
+events_2014 <- rbind(events_2014, duplicate)
+events_2014[events_2014$ort=="Gelsenkirchen und Witten", ]$ort <- c("Gelsenkirchen", "Witten")
+
 
 # Under Windows: Fix encoding again: even though this script is supposed to be utf-8, the above substitutions are not.
 if (.Platform$OS.type == "windows") {
@@ -49,7 +63,7 @@ if (.Platform$OS.type == "windows") {
 
 ## geocode all events from 2014
 # locations <- paste(events_2014$ort, events_2014$bundesland, sep = ", ")
-## locations <- enc2utf8(locations) # necessary for locations containing umlauts
+# locations <- enc2utf8(locations) # necessary for locations containing umlauts
 # geocodes_2014 <- ggmap::geocode(locations, output = "all", source = "google", nameType = "long")
 # save(geocodes_2014, file = "data-raw/geocodes_2014.Rdata")
 
@@ -64,7 +78,7 @@ events_2014 <- filter(events_2014, !(ort=="Heidenheim"), !(datum=="07.01.2014"))
 # events from 2015 --------------------------------------------------------
 
 # scrape the website (save data for quicker use)
-# events_2015 <- ldply(c(0:94), read_data, .progress="text")
+# events_2015 <- ldply(c(0:115), read_data, .progress="text")
 # save(events_2015, file = "data-raw/events_2015.Rdata")
 load("data-raw/events_2015.Rdata")
 events_2015 <- colwise(function(x)iconv(x, from = "utf8", to = "utf8"))(events_2015) # clean up encoding
@@ -105,7 +119,8 @@ events <- events %>%
 
 
 # clean variable names ----------------------------------------------------
-events <- events %>%
+arvig <- events %>%
+  select(-location) %>%
   mutate(date = dmy(datum)) %>%
   rename(location = ort,
          state = bundesland,
@@ -126,4 +141,4 @@ events <- events %>%
   select(date, location, state, community_id, longitude, latitude, category_de, category_en, description, `source`)
 
 
-#save(events, file = "./data/events.Rda")
+#save(arvig, file = "./data/arvig.Rda")
