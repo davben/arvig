@@ -1,6 +1,6 @@
 Package: arvig
 Title: Data About Right-Wing Violence in Germany in 2014 and 2015
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: as.person(c(
     "David Benček <david.bencek@ifw-kiel.de> [aut, cre]",
     "Julia Strasheim <julia.strasheim@giga.hamburg> [aut]"

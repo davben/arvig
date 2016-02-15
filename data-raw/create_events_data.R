@@ -119,7 +119,7 @@ events <- events %>%
 
 
 # clean variable names ----------------------------------------------------
-arvig <- events %>%
+arvig_data <- events %>%
   select(-location) %>%
   mutate(date = dmy(datum)) %>%
   rename(location = ort,
@@ -141,4 +141,4 @@ arvig <- events %>%
   select(date, location, state, community_id, longitude, latitude, category_de, category_en, description, `source`)
 
 
-#save(arvig, file = "./data/arvig.Rda")
+#save(arvig_data, file = "./data/arvig_data.rda")

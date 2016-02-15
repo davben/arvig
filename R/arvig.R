@@ -1,6 +1,6 @@
-#' 1645 events of anti-refugee violence in Germany in 2014 and 2015.
+#' ARVIG data.
 #'
-#' A dataset containing georeferenced events of anti-refugee violence in
+#' A dataset containing 1645 georeferenced events of anti-refugee violence in
 #' Germany during the years 2014 and 2015.
 #'
 #' @format A data frame with 1645 rows and 10 variables:
@@ -17,4 +17,4 @@
 #'   \item{source}{primary source}
 #' }
 #' @source \url{https://www.mut-gegen-rechte-gewalt.de}
-"arvig"
+"arvig_data"
