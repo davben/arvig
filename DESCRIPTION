@@ -1,11 +1,11 @@
-Package: rightwingviolence
+Package: arvig
 Title: Data About Right-Wing Violence in Germany in 2014 and 2015
 Version: 0.0.0.9000
 Authors@R: as.person(c(
     "David Benček <david.bencek@ifw-kiel.de> [aut, cre]",
     "Julia Strasheim <julia.strasheim@giga.hamburg> [aut]"
   ))
-Description: Georeferenced data on Right-Wing violence in Germany in 2014 and
+Description: Georeferenced data on anti-refugee violence in Germany in 2014 and
     2015.
 Depends:
     R (>= 3.2.2)

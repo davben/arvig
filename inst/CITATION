@@ -1,7 +1,7 @@
-citHeader("To cite rightwingviolence in publications use:")
+citHeader("To cite ARVIG in publications use:")
 
 citEntry(entry = "Article",
-  title        = "Refugees Welcome? Introducing a Georeferenced Event Dataset on Right-Wing Violence in Germany, 2014-2015",
+  title        = "Refugees Welcome\\? Introducing A New Dataset on Anti-Refugee Violence in Germany, 2014-2015",
   author       = personList(as.person("Julia Strasheim"),
                    as.person("David Benček")),
   journal      = "Journal of",
@@ -13,7 +13,7 @@ citEntry(entry = "Article",
 
   textVersion  =
   paste("Julia Strasheim, David Benček (2015).",
-        "Refugees Welcome? Introducing a Georeferenced Event Dataset on Right-Wing Violence in Germany, 2014-2015",
+        "Refugees Welcome\\? Introducing A New Dataset on Anti-Refugee Violence in Germany, 2014-2015",
         "Journal of, vol(number), pages",
         "URL url.")
 )
