@@ -68,7 +68,7 @@ if (.Platform$OS.type == "windows") {
 # save(geocodes_2014, file = "data-raw/geocodes_2014.Rdata")
 
 load("data-raw/geocodes_2014.Rdata")
-geocodes_2014_df <- ldply(geocodes_2014, extract_from_geocode)
+geocodes_2014_df <- ldply(geocodes_2014, arvig:::extract_from_geocode)
 events_2014 <- tbl_df(cbind(events_2014, geocodes_2014_df))
 
 
@@ -95,7 +95,7 @@ events_2015[events_2015$datum == "01.09.2015" & events_2015$ort == "Massow", ]$o
 # save(geocodes_2015, file = "./data-raw/geocodes_2015.Rdata")
 
 load("data-raw/geocodes_2015.Rdata")
-geocodes_2015_df <- ldply(geocodes_2015, extract_from_geocode)
+geocodes_2015_df <- ldply(geocodes_2015, arvig:::extract_from_geocode)
 events_2015 <- tbl_df(cbind(events_2015, geocodes_2015_df))
 
 
@@ -110,7 +110,7 @@ load("data-raw/germany_250.Rdata")
 # assign temporary event ID
 events$id <- 1:nrow(events)
 # map events to subregions of Germany
-keys <- check_polygons(germany_250, events[ ,c("id", "lon", "lat")], key = "RS")
+keys <- arvig:::check_polygons(germany_250, events[ ,c("id", "lon", "lat")], key = "RS")
 
 events <- events %>%
   left_join(keys, "id") %>%
@@ -119,7 +119,7 @@ events <- events %>%
 
 
 # clean variable names ----------------------------------------------------
-arvig_data <- events %>%
+arvig <- events %>%
   select(-location) %>%
   mutate(date = dmy(datum)) %>%
   rename(location = ort,
@@ -141,4 +141,4 @@ arvig_data <- events %>%
   select(date, location, state, community_id, longitude, latitude, category_de, category_en, description, `source`)
 
 
-#save(arvig_data, file = "./data/arvig_data.rda")
+#save(arvig, file = "./data/arvig.rda")
