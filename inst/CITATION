@@ -1,19 +1,19 @@
 citHeader("To cite ARVIG in publications use:")
 
 citEntry(entry = "Article",
-  title        = "Refugees Welcome\\? Introducing A New Dataset on Anti-Refugee Violence in Germany, 2014-2015",
-  author       = personList(as.person("Julia Strasheim"),
-                   as.person("David Benček")),
-  journal      = "Journal of",
-  year         = "2015",
-  volume       = "x",
-  number       = "y",
-  pages        = "xx-zz",
-  url          = "http://www.journal.com",
+  title        = "Refugees Welcome\\? Introducing a New Dataset on Anti-Refugee Violence in Germany, 2014--2015",
+  author       = personList(as.person("David Benček"),
+                            as.person("Julia Strasheim")
+                            ),
+  journal      = "Kiel Working Paper",
+  year         = "2016",
+  volume       = "2032",
+  pages        = "1-14",
+  url          = "https://www.ifw-members.ifw-kiel.de/publications/refugees-welcome-introducing-a-new-dataset-on-anti-refugee-violence-in-germany-201420132015",
 
   textVersion  =
-  paste("Julia Strasheim, David Benček (2015).",
-        "Refugees Welcome\\? Introducing A New Dataset on Anti-Refugee Violence in Germany, 2014-2015",
-        "Journal of, vol(number), pages",
-        "URL url.")
+  paste("Benček, David and Julia Strasheim (2015).",
+        "Refugees Welcome\\? Introducing a New Dataset on Anti-Refugee Violence in Germany, 2014--2015",
+        "Kiel Working Paper 2032, 14",
+        "URL https://www.ifw-members.ifw-kiel.de/publications/refugees-welcome-introducing-a-new-dataset-on-anti-refugee-violence-in-germany-201420132015.")
 )
