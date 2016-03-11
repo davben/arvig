@@ -103,8 +103,8 @@ events_2015 <- tbl_df(cbind(events_2015, geocodes_2015_df))
 events <- rbind(events_2014, events_2015)
 
 
-# include „Kreisschlüssel“ for each event ---------------------------------
-## use shapefile to determine the respective "Kreisschlüssel" for each event.
+# include „Regionalschlüssel“ for each event ---------------------------------
+## use shapefile to determine the respective "Regionalschlüssel" for each event.
 load("data-raw/germany_250.Rdata")
 
 # assign temporary event ID
