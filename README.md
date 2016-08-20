@@ -14,3 +14,5 @@ and use the dataset via
 
     library(arvig)
     data("arvig")
+	
+You can also download and view the data as a `.csv`-file [here](https://www.ifw-members.ifw-kiel.de/publications/refugees-welcome-introducing-a-new-dataset-on-anti-refugee-violence-in-germany-201420132015/arvig_dataset.csv).
