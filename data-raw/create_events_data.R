@@ -138,7 +138,8 @@ arvig <- events %>%
                                                                      ifelse(kategorie == "Sonstige Angriffe auf Unterkünfte & Tätlicher Übergriff/Körperverletzung", "miscellaneous attack & assault",
                                                                             ifelse(kategorie == "Kundgebung/Demo & Sonstige Angriffe auf Unterkünfte & Tätlicher Übergriff/Körperverletzung", "demonstration & miscellaneous attack & assault", kategorie)))))))))) %>%
   rename(category_de = kategorie) %>%
-  select(date, location, state, community_id, longitude, latitude, category_de, category_en, description, `source`)
+  select(date, location, state, community_id, longitude, latitude, category_de, category_en, description, `source`) %>%
+  arrange(date, community_id)
 
 
 #save(arvig, file = "./data/arvig.rda")

@@ -1,0 +1,297 @@
+---
+title: "Introduction to ARVIG - A dataset on anti-refugee violence in Germany"
+author: David Benček^[Kiel Institute for the World Economy, david.bencek@ifw-kiel.de] and Julia Strasheim^[GIGA German Institute of Global and Area Studies, julia.strasheim@giga-hamburg.de]
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: arvig.bib
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This vignette provides a brief overview of the `arvig` dataset on anti-refugee violence in Germany.
+The information used in the dataset is collected by the project *Mut gegen rechte Gewalt* and publicized in an online chronicle on [https://www.mut-gegen-rechte-gewalt.de/service/chronik-vorfaelle](https://www.mut-gegen-rechte-gewalt.de/service/chronik-vorfaelle).
+In order to provide a scientifically usable source of information on anti-refugee violence and social unrest in Germany, the `arvig` R package offers a georeferenced event dataset based on this public chronicle.
+Below, we present the included variables and offer descriptive statistics and patterns of the data.
+For more background, see the accompanying paper "Refugees welcome? A dataset on anti-refugee violence in Germany" [Link to be inserted](?).
+
+## Installation
+You can install the R package from Github with:
+```{r installation, echo=TRUE, eval=FALSE}
+# install.packages("devtools")
+devtools::install_github("davben/arvig")
+```
+
+
+## Categories of Right-Wing Violence
+
+```{r libraries, echo=TRUE, warning=FALSE, message=FALSE}
+# Load the required packages for this vignette
+library(arvig)
+library(lubridate)
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(rgdal)
+library(tidyr)
+library(broom)
+library(maptools)
+```
+
+The chronicle provided by the MGRG project documents four different types of attacks and unrest against refugees and refugee housing in Germany: demonstrations, assault, arson attacks, and miscellaneous attacks against refugee housing.
+The collection is based on public reporting in newspaper articles, press releases by the German police, parliamentary interpellations as well as publicly accessible reports by local and regional organizations offering advice and consultation for victims of right-wing violence [@amadeu_antonio_stiftung_mut_2016].
+
+The first type of violence and social unrest reported by MGRG are events of anti-refugee demonstrations, such as the  rallies staged by Pegida since December 2014.
+To give one example of the demonstrations the project reports, on 14 March 2015, 180 people protested against the construction of a new refugee shelter in the city of Flöha in Saxony.
+The demonstration was registered by Pegida-spokesperson Steffen Musolt and at least one man was reported shouting "Sieg Heil!" [@freie_presse_180_2015].
+Notably, MGRG points out that because anti-refugee demonstrations and rallies have been on the rise in recent years, it is impossible to collect information on every single one of them. 
+Thus, demonstrations can be expected to be under-reported in the chronicle -- and thus also in the dataset presented here.\footnote{MGRG also notes that under-reporting has become a problem mostly since January 2016, at which point the Amadeu Antonio Foundation and PRO ASYL have limited themselves to reporting demonstrations that specifically disregarded German law, meaning that the demonstration was illegal and not registered with the authorities beforehand, the demonstration included assaults against journalists or police, or demonstrators were reported using hate speech (*Volksverhetzung*) [@amadeu_antonio_stiftung_mut_2016]. 
+Since January 2016 is outside the scope of this dataset, we do not expect severe under-reporting for our observation period.}
+
+The second type of violence reported by the MGRG project concerns physical assaults and bodily injuries.
+For instance, on  12 January 2015, a Libyan asylum seeker was heavily injured in Dresden.
+He had been asked for cigarettes by "men wearing bomber jackets," and after he did not understand the question, one of the men reportedly poured hot liquid over his face, shoulders, and arms, making him seek medical treatment [@morgenpost_weiterer_2015].
+There exist some limitations to the reporting of this type of violence as well: 
+MGRG notes that information on assaults is only recorded in the chronicle if assault is carried out against an individual with refugee status.
+Assaults against, for instance, left-wing protesters, volunteers helping incoming refugees, or journalists covering xenophobic rallies, are not recorded.
+MGRG furthermore points out that the actual number of assaults -- independent of the status of the victim -- is likely to be much higher than what is reported in the chronicle [@amadeu_antonio_stiftung_mut_2016].
+
+The third and fourth type of anti-refugee violence reported by MGRG provides information on arson attacks against refugee housing, as well as on miscellaneous attacks against such shelters. 
+For instance, on 23 March 2015, a group of unknown attackers was reported trying to set fire to a school in Berlin-Kreuzberg that houses refugees, an attack during which luckily noone was injured [@berlin_online_brandanschlag_2015]. 
+Miscellaneous attacks against refugee housing comprise instances of rocks thrown at shelters or xenophobic graffiti.
+For example, on 08 January 2015, unknown attackers painted swastikas on the walls of a house in Hausberge/Porta Westfalica (North Rhine-Westphalia) that was supposed to be turned into a refugee shelter [@mindener_tageblatt_haus_2015].
+
+In addition to these four distinct categories, some of the reported events include mixed forms of anti-refugee attacks, such as demonstrations at which refugee shelters were attacked:
+On 06 March 2015, an anti-asylum demonstration of 1500 people in Freital (Saxony) not only attacked police officers and journalists with pyrotechnics, but some demonstrators also forced their way to a refugee shelter and reportedly vandalized the building (Tagesspiegel, 2015). 
+
+We can summarize the frequencies of all observed event types in the dataset:
+```{r event_frequencies, echo=TRUE}
+frequency_table <- arvig %>%
+  count(category_en) %>%
+  rename(Category = category_en, 
+         N = n)
+frequency_table[is.na(frequency_table$Category),]$Category <- "other"
+knitr::kable(frequency_table, caption = "Frequencies of Event Categories")
+```
+
+
+For a clearer presentation, multi-category events can be split and mapped to each base category:
+```{r data, echo=TRUE, cache=TRUE}
+# separate multi-category events into multiple rows
+arvig_separated <- ddply(arvig, .(category_de), function(x){
+  if (is.na(x$category_en[1])) return(x)
+  splits_group <- stringi::stri_count_fixed(x$category_en[1], "&")
+  if (splits_group==1) {
+    two <- x %>%
+      separate(category_en, c("cat1", "cat2"), sep = " & ") %>%
+      gather(helper, category_en, c(cat1, cat2)) %>%
+      select(date, location, state, community_id, longitude, latitude, 
+             category_de, category_en, description, `source`)
+    return(two)
+  }
+  if (splits_group==2) {
+    three <- x %>%
+      separate(category_en, c("cat1", "cat2", "cat3"), sep = " & ") %>%
+      gather(helper, category_en, c(cat1, cat2, cat3)) %>%
+      select(date, location, state, community_id, longitude, latitude, 
+             category_de, category_en, description, `source`)
+    return(three)
+  }
+  x
+}) %>%
+  arrange(date)
+```
+
+
+
+Using the spatial information for each event in the dataset, we can obtain a geographical overview by plotting all events on a map of Germany, distinguishing them by category:
+```{r germany_shapefile, echo=TRUE}
+# germany_1000_lan <- readOGR(dsn = "./vg1000-ew_3112.utm32s.shape.ebenen/vg1000-ew_ebenen", layer = "VG1000_LAN")
+# germany_1000_lan <- spTransform(germany_1000_lan, CRS("+proj=longlat +ellps=GRS80 +datum=WGS84 +no_defs"))
+# 
+# germany_1000_lan <- germany_1000_lan[germany_1000_lan@data$GF == 4,] # discard polygons not representing land mass.
+# save(germany_1000_lan, file = "./data/germany_1000_lan.rda")
+
+load(file = "../data/germany_1000_lan.rda")
+germany_df <- tidy(germany_1000_lan, region="RS")
+```
+
+
+```{r events_map, echo=TRUE, fig.height=9, fig.width=7, fig.cap="Geographic Overview of Events by Category"}
+# plot events on map
+events_plot <- ggplot(germany_df) + 
+  geom_map(map = germany_df, aes(long, lat, map_id = id), 
+           colour = "#f2f2f2", fill ="#d9d9d9", size = 0.1) + 
+  geom_point(data = arvig_separated, 
+             aes(longitude, latitude, colour = factor(category_en)), alpha=0.6, size=3) +
+  scale_color_colorblind(name="") +
+  guides(colour = guide_legend(ncol = 1, override.aes = list(size=5))) +
+  coord_map("vandergrinten") + 
+  theme_map() +
+  theme(legend.position = c(0.01, 0.975), 
+        legend.justification = c(0, 1),
+        legend.key = element_blank(),
+        legend.text=element_text(size=12),
+        legend.title=element_text(size=12))
+
+plot(events_plot)
+```
+
+
+## Variables and Patterns
+
+To illustrate the set of variables, we can view a sample record from the dataset:
+
+```{r sample_table, echo=TRUE}
+sample_table <- filter(arvig, date==dmy("06.03.2015"), location=="Freital") %>%
+  colwise(function(x)as.character(x))(.) %>%
+  gather(Variable, Sample)
+
+knitr::kable(sample_table, caption="Sample Event from the ARVIG dataset")
+```
+
+
+
+During the summer of 2015, instances of anti-refugee violence have increased rapidly.
+We can obtain the number of events for each day and look at which days have seen the highest number of events:
+
+```{r day_counts, echo=TRUE}
+day_counts <- arvig_separated %>%
+  count(date) %>%
+  arrange(desc(n))
+
+head(day_counts)
+```
+
+A histogram of event counts shows that only 167 or about 23% of the days in the two-year period covered by the data have not seen an event.
+For all other days the dataset exhibits at least one event (up to a maximum number of 17).
+```{r day_histogram, echo=TRUE, fig.width = 6, fig.height = 4, fig.cap="Histogram: Events per Day"}
+day_histogram <- arvig_separated %>% 
+  count(date) %>%
+  right_join(data.frame(date=seq(dmy("01.01.2014"), dmy("31.12.2015"), by="day")), by = "date")
+day_histogram$n[is.na(day_histogram$n)] <- 0
+
+day_histogram_plot <- ggplot(day_histogram, aes(n)) +
+  geom_histogram(binwidth = 1, boundary = -0.5, fill="#E69F00") +
+  xlab("Events per day") +
+  ylab("Days") +
+  theme_bw()
+print(day_histogram_plot)
+```
+
+
+The `arvig` dataset specifies the *location* and *federal state* of events as reported by MGRG (in German writing, thus including
+umlauts). 
+All federal states of Germany have seen right-wing violence and social unrest in 2014 and 2015, but with strong variation in the number of events.
+By far the highest number of anti-refugee violence and unrest was recorded in Saxony, with 394 events in the 24 months under analysis, followed by North Rhine-Westphalia (231 events)  and Berlin (210 events). 
+The traditionally left-wing governed Bremen (where all State Premiers since 1945 have belonged to the Social Democratic Party), on the other hand, saw only 2
+events in the past two years: 
+two arson attacks on 26 October 2015 and 26 September 2015. 
+If we control for state inhabitants, the densely populated North Rhine-Westphalia drops out of the top three and is replaced by Mecklenburg-Vorpommern -- a federal state that has a history of xenophobic violence against asylum seekers, for instance when between 22 and 24 August 1992, several hundred violent protesters in the
+Lichtenhagen district of Rostock threw stones and petrol bombs at a refugee shelter and were applauded by an even larger crowd of bystanders. 
+
+The following plot depicts the number of events per 100\,000 inhabitants for all federal states and shows a clear divide between West and East Germany in the number of events directed against refugees.
+```{r state_counts_plot, echo=TRUE, fig.width=7, fig.height=6, fig.cap="Events per 100 000 inhabitants by state and category. Federal states of the former German Democratic Republic are marked with an asterisk."}
+state_counts <- arvig_separated %>%
+  mutate(state_nr = as.numeric(substr(community_id, 1, 2))) %>%
+  filter(!is.na(category_en)) %>%
+  count(state_nr, category_en) %>%
+  arrange(desc(n))
+
+load("../data/germany_1000_krs.rda")
+inhabitants <- germany_1000_krs@data %>%
+  select(RS, EWZ) %>%
+  filter(EWZ > 0) %>%
+  mutate(state_nr = as.numeric(substr(RS, 1, 2))) %>%
+  group_by(state_nr) %>%
+  summarise(inhabitants = sum(EWZ))
+
+states <- arvig %>%
+  mutate(state_nr = as.numeric(substr(community_id, 1, 2))) %>%
+  dplyr::select(state, state_nr) %>%
+  distinct(state, state_nr)
+
+state_counts <- state_counts %>%
+  left_join(inhabitants, "state_nr") %>%
+  mutate(per_100k = n/inhabitants*100000) %>%
+  left_join(states, "state_nr") %>%
+  mutate(east = state_nr > 10,
+         state_label = ifelse(east, paste0(state, "*"), state),
+         state_label = reorder(state_label, state_nr)) %>%
+  arrange(state, category_en)
+
+state_counts_plot <- ggplot(state_counts, aes(state_label, per_100k, fill=category_en)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c("#e69f00", "#d55e00", "#0072b2", "#009e73"), 
+                    labels = c("Arson", "Assault", "Demonstration", "Misc. Attack")) +
+  xlab("") +
+  ylab("Events per 100 000 inhabitants") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1),
+        legend.title = element_blank(),
+        legend.position=c(0.04, 0.99), 
+        legend.justification=c(0,1),
+        legend.key = element_rect(colour = NA),
+        legend.background = element_rect(colour = "grey", size = .5))
+print(state_counts_plot)
+```
+
+
+
+Additionally, we can depict this relationship at the district level.
+This map again highlights the high number of anti-refugee events taking place in East Germany, with a particularly high count in the district of Saxon Switzerland-East Ore Mountains (*Sächsische Schweiz-Osterzgebirge*). 
+This district had in total 67 events of anti-refugee violence, including 10 instances of assault, 5 instances of arson, and 21 miscellaneous attacks in 2014 and 2015, while being sparsely populated with only 245\,954 inhabitants -- fewer than cities such as Mannheim, Karlsruhe, or Bonn.
+
+```{r intensity_map_district, echo=TRUE, fig.height=9, fig.width=7, fig.cap="Events per 100 000 inhabitants by districts"}
+district_counts <- arvig_separated %>%
+  mutate(id = substr(community_id, 1, 5)) %>%
+  count(id)
+
+germany_1000_krs_df <- tidy(germany_1000_krs, region="RS")
+
+district_data <- germany_1000_krs@data %>%
+  select(RS, EWZ) %>%
+  filter(EWZ > 0) %>%
+  rename(id = RS,
+         population = EWZ) %>%
+  mutate(id = as.character(id)) %>%
+  left_join(district_counts, "id") %>%
+  mutate(per_100k = ifelse(is.na(n), 0, n/population * 100000),
+         per_100k_f = cut(per_100k, c(0, 5, 10, 15, 20, 25,30), ordered_result = TRUE)) %>%
+  right_join(germany_1000_krs_df, "id")
+
+holes <- unique(district_data[district_data$hole == TRUE,]$id)
+
+intensity_map_district <- ggplot(district_data, aes(long, lat, group = id, fill = per_100k_f)) +
+  geom_map(map = district_data, aes(map_id = id)) +
+  geom_map(map = filter(district_data, id %in% holes), 
+           data = filter(district_data, id %in% holes),
+           aes(map_id = id), colour = "#f2f2f2", size = 0.1) +
+  geom_map(map = filter(district_data, !id %in% holes), 
+           data = filter(district_data, !id %in% holes),
+           aes(map_id = id), colour = "#f2f2f2", size = 0.1) +
+  scale_fill_brewer(name="", palette = "YlOrRd", na.value="#d9d9d9") +
+  coord_map("vandergrinten") + 
+  theme_map() +
+  theme(legend.position = c(0.05, 0.975), 
+        legend.justification = c(0, 1),
+        legend.text=element_text(size=12))
+print(intensity_map_district)
+```
+
+
+Using the date variable in the dataset, we can observe that in terms of their distribution over weekdays, assault, arson and miscellaneous attacks behave quite similarly: 
+They are relatively evenly distributed over all seven days of the week, with minor spikes on the weekends (more prominent for assault and miscellaneous attacks on Saturdays). 
+Demonstrations, on the other hand, show a very strong spike on Saturdays. 
+This could indicate that while demonstrations are planned and organized -- they must be registered with the police beforehand, after all -- the other three types of anti-refugee violence and unrest occur more spontaneously. 
+This distribution is at least to some extent suprising because past research has found that acts of right-wing violence in Germany occur disproportionately often on weekend nights [@braun_diffusion_2010], a finding that is usually linked to alcohol consumption of young men. 
+Also @braun_diffusion_2011 has found that weekend nights -- and summer periods -- are strong predictors for an increased hazard of xenophobic violence in the Netherlands.
+
+## Conclusion
+The `arvig` dataset complements existing research on the determinants and effects of anti-refugee attacks in Germany and Western Europe with new and systematic data.
+The event-based coding as well as the adherent information on event-locations make the data useful for a variety of analyses, both event-based or aggregated to German administrative units such as the municipalities (*Gemeinden*) or districts (*Kreise*). 
+In that regard, the data presented here offer a starting point to analyze the recent rise in anti-refugee violence from different disciplinary backgrounds, including, but not limited to, criminology, sociology, political science, or economics.
+
+## References
