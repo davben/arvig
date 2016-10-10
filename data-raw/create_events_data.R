@@ -75,41 +75,45 @@ events_2014 <- tbl_df(cbind(events_2014, geocodes_2014_df))
 # Due to ambiguity in the documentation of the event, the following observation is excluded:
 events_2014 <- filter(events_2014, !(ort=="Heidenheim"), !(datum=="07.01.2014"))
 
-# events from 2015 --------------------------------------------------------
+
+# events from 2015 onwards ------------------------------------------------
 
 # scrape the website (save data for quicker use)
-# events_2015 <- ldply(c(0:115), read_data, .progress="text")
-# save(events_2015, file = "data-raw/events_2015.Rdata")
-load("data-raw/events_2015.Rdata")
-events_2015 <- colwise(function(x)iconv(x, from = "utf8", to = "utf8"))(events_2015) # clean up encoding
+# events_2015_later <- read_chronicle(c(2015, 2016))
+# save(events_2015_later, file = "data-raw/events_2015_later.Rdata")
+load("data-raw/events_2015_later.Rdata")
+events_2015_later <- colwise(function(x)iconv(x, from = "utf8", to = "utf8"))(events_2015_later) # clean up encoding
 
 # separate strings in cases of more than one category per event
-events_2015$kategorie <- gsub("([a-z])([A-Z])","\\1 & \\2", events_2015$kategorie)
+events_2015_later$kategorie <- gsub("([a-z])([A-Z])","\\1 & \\2", events_2015_later$kategorie)
 
 # Provide additional information for correct geo-coding:
-events_2015[events_2015$datum == "01.09.2015" & events_2015$ort == "Massow", ]$ort <- "Massow (LDS)"
+events_2015_later[events_2015_later$datum == "01.09.2015" & events_2015_later$ort == "Massow", ]$ort <- "Massow (LDS)"
 
 ## geocode all events from 2015
-# locations <- paste(events_2015$ort, events_2015$bundesland, sep = ", ")
-# geocodes_2015 <- ggmap::geocode(locations, output = "all", source = "google", nameType = "long")
-# save(geocodes_2015, file = "./data-raw/geocodes_2015.Rdata")
+# locations <- paste(events_2015_later$ort, events_2015_later$bundesland, sep = ", ")
+# locations_unique <- unique(locations)
+# geocodes_2015_later <- ggmap::geocode(locations_unique, output = "all", source = "google", nameType = "long")
+# save(geocodes_2015_later, file = "./data-raw/geocodes_2015_later.Rdata")
 
-load("data-raw/geocodes_2015.Rdata")
-geocodes_2015_df <- ldply(geocodes_2015, arvig:::extract_from_geocode)
-events_2015 <- tbl_df(cbind(events_2015, geocodes_2015_df))
+load("data-raw/geocodes_2015_later.Rdata")
+geocodes_2015_later_df <- ldply(geocodes_2015_later, arvig:::extract_from_geocode) %>%
+  mutate(location = locations_unique) %>%
+  right_join(data_frame(location = locations), "location")
+events_2015_later <- tbl_df(cbind(events_2015_later, geocodes_2015_later_df))
 
 
 # create combined data frame ----------------------------------------------
-events <- rbind(events_2014, events_2015)
+events <- rbind(events_2014, events_2015_later)
 
 
 # include „Regionalschlüssel“ for each event ---------------------------------
 ## use shapefile to determine the respective "Regionalschlüssel" for each event.
-load("data-raw/germany_250.Rdata")
+load("data-raw/germany_250.rda")
 
 # assign temporary event ID
 events$id <- 1:nrow(events)
-# map events to subregions of Germany
+# map events to subregions of Germany (takes a long time)
 keys <- arvig:::check_polygons(germany_250, events[ ,c("id", "lon", "lat")], key = "RS")
 
 events <- events %>%

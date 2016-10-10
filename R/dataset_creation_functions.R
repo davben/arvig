@@ -21,29 +21,76 @@ extract_from_geocode <- function(x){
 }
 
 
-
-#' Scrape Events of Right-Wing Violence in 2015 from Online Source.
+#' Scrape Events of Anti-Refugee Violence from "Mut gegen rechte Gewalt" Chronicle.
 #'
 #' This function is built only for one specific purpose:
 #' Scraping the website \url{https://www.mut-gegen-rechte-gewalt.de/service/chronik-vorfaelle}
-#' for all events in 2015. It retrieves the date, location, bundesland, category, summary and source
-#' for each event and returns a data frame.
+#' for all events a specified year (currently, 2015 and 2016). It retrieves the date, location,
+#' bundesland, category, summary and source for each event and returns a data frame.
 #'
-#' @param page integer between 0 and n (which is the current maximum number of subpages in the list of events minus 1).
+#' @param years numeric vector of years for which to retrieve data from the chronicle.
 #' @return A data frame of events as listed on the website, consisting of columns for date, location, bundesland,
 #'    category, summary and source.
-read_data <- function(page) {
-  gewalt <- read_html(paste0("https://mut-gegen-rechte-gewalt.de/service/chronik-vorfaelle?&&field_date_value[value][year]=2015&page=", page))
+#' @examples
+#' \dontrun{
+#' chronicle <- read_chronicle(c(2015, 2016))
+#' }
+read_chronicle <- function(years) {
+  ldply(years, read_chronicle_year, .progress = "text")
+}
 
-  ort <- gewalt %>%
+#' Scrape Events of Anti-Refugee Violence in a Given Year.
+#'
+#' This function scrapes all events in a specified year from the "Mut gegen rechte Gewalt" chronicle.
+#' It retrieves the date, location,
+#' bundesland, category, summary and source for each event and returns a data frame.
+#'
+#' @param year numeric value specifying the year for which to retrieve data from the chronicle.
+#'    Currently, it only works with 2015 or 2016.
+#' @return A data frame of events from a single year as listed in the chronicle,
+#'    consisting of columns for date, location, bundesland, category, summary and source.
+read_chronicle_year <- function(year) {
+  if (!(year %in% c(2015, 2016))) stop("Data can only be retrieved for the years 2015 and 2016")
+  base_page <- paste0("https://mut-gegen-rechte-gewalt.de/service/chronik-vorfaelle?&&field_date_value[value][year]=", year,"&page=0")
+  chronicle <- read_html(base_page)
+
+  last_page <- chronicle %>%
+    html_node(".pager-last a") %>%
+    html_attr("href") %>%
+    stringi::stri_extract(regex = "page=[0-9]+") %>%
+    gsub("page=", "", .) %>%
+    as.numeric()
+
+  print(paste0("Retrieving data for the year ", year, " from ", last_page + 1, " pages."))
+
+  out <- ldply(0:last_page, read_chronicle_page, chronicle_year = year, .progress = "text")
+  out
+}
+
+
+#' Scrape Individual Chronicle Page for Events of Anti-Refugee Violence in a Given Year.
+#'
+#' This function scrapes a single page from the "Mut gegen rechte Gewalt" chronicle.
+#' It retrieves the date, location,
+#' bundesland, category, summary and source for each event and returns a data frame.
+#'
+#' @param chronicle_year numeric value specifying the year for which to retrieve data from the chronicle.
+#'    Currently, it only works with 2015 or 2016.
+#' @param page_nr numeric value specifying chronicle page from which to retrieve data.
+#' @return A data frame of events from a single chronicle page as listed in the chronicle,
+#'    consisting of columns for date, location, bundesland, category, summary and source.
+read_chronicle_page <- function(page_nr, chronicle_year) {
+  violence <- read_html(paste0("https://mut-gegen-rechte-gewalt.de/service/chronik-vorfaelle?&&field_date_value[value][year]=", chronicle_year,"&page=", page_nr))
+
+  ort <- violence %>%
     html_nodes(".field-name-field-city") %>%
     html_text()
 
-  bundesland <- gewalt %>%
+  bundesland <- violence %>%
     html_nodes(".field-name-field-bundesland") %>%
     html_text()
 
-  quelle_raw <- gewalt %>%
+  quelle_raw <- violence %>%
     html_nodes(".node-chronik-eintrag")
 
   quelle <- sapply(quelle_raw, function(x){
@@ -56,20 +103,19 @@ read_data <- function(page) {
     return(links)
   })
 
-  datum <- gewalt %>%
+  datum <- violence %>%
     html_nodes(".field-name-field-date") %>%
     html_text()
 
-  kategorie <- gewalt %>%
+  kategorie <- violence %>%
     html_nodes(".field-name-field-art") %>%
     html_text()
 
-  zusammenfassung <- gewalt %>%
+  zusammenfassung <- violence %>%
     html_nodes(".field-type-text-with-summary") %>%
     html_text()
 
   result <- dplyr::data_frame(datum, ort, bundesland, kategorie, zusammenfassung, quelle)
-  return(result)
 }
 
 #' Find the polygon in which a spatial point is located.
