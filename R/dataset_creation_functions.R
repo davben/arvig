@@ -115,7 +115,8 @@ read_chronicle_page <- function(page_nr, chronicle_year) {
     html_nodes(".field-type-text-with-summary") %>%
     html_text()
 
-  result <- dplyr::data_frame(datum, ort, bundesland, kategorie, zusammenfassung, quelle)
+  result <- dplyr::data_frame(datum, ort, bundesland, kategorie, zusammenfassung, quelle) %>%
+    mutate_all(funs(gsub("^\\s+|\\s+$", "", .)))
 }
 
 #' Find the polygon in which a spatial point is located.
