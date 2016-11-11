@@ -87,8 +87,23 @@ events_2015_later <- colwise(function(x)iconv(x, from = "utf8", to = "utf8"))(ev
 # separate strings in cases of more than one category per event
 events_2015_later$kategorie <- gsub("([a-z])([A-Z])","\\1 & \\2", events_2015_later$kategorie)
 
-# Provide additional information for correct geo-coding:
+# Provide additional information or fix errors for correct geo-coding:
 events_2015_later[events_2015_later$datum == "01.09.2015" & events_2015_later$ort == "Massow", ]$ort <- "Massow (LDS)"
+
+events_2015_later[events_2015_later$datum == "26.03.2016" & events_2015_later$ort == "Halle" & events_2015_later$bundesland == "Sachsen", ]$bundesland <- "Sachsen-Anhalt"
+events_2015_later[events_2015_later$datum == "01.06.2016" & events_2015_later$ort == "Merseburg" & events_2015_later$bundesland == "Sachsen", ]$bundesland <- "Sachsen-Anhalt"
+
+events_2015_later[events_2015_later$datum == "23.08.2016" & events_2015_later$ort == "Wittenberge" & events_2015_later$bundesland == "Sachsen-Anhalt", ]$ort <- "Wittenberg"
+
+events_2015_later[events_2015_later$datum == "27.01.2016" & events_2015_later$ort == "Melle" & events_2015_later$bundesland == "Nordrhein-Westfalen", ]$bundesland <- "Niedersachsen"
+
+events_2015_later[events_2015_later$datum == "18.05.2016" & events_2015_later$ort == "Geldern" & events_2015_later$bundesland == "Niedersachsen", ]$bundesland <- "Nordrhein-Westfalen"
+
+events_2015_later[events_2015_later$datum == "16.09.2015" & events_2015_later$ort == "Goslar" & events_2015_later$bundesland == "Hessen", ]$bundesland <- "Niedersachsen"
+
+# Due to ambiguity as to whether this event took place in Mainz (RP) or in parts of the city of Wiesbaden (HE)
+# that contain "Mainz", this event is excluded
+events_2015_later <- events_2015_later[!(events_2015_later$datum == "14.11.2015" & events_2015_later$ort == "Mainz" & events_2015_later$bundesland == "Hessen"), ]
 
 ## geocode all events from 2015
 # locations <- paste(events_2015_later$ort, events_2015_later$bundesland, sep = ", ")
