@@ -4,6 +4,7 @@ library(rvest)
 library(rgdal)
 library(maptools)
 library(lubridate)
+#library(ggmap)
 
 # events from 2014 --------------------------------------------------------
 load("data-raw/events_2014.Rdata")
@@ -101,6 +102,30 @@ events_2015_later[events_2015_later$datum == "18.05.2016" & events_2015_later$or
 
 events_2015_later[events_2015_later$datum == "16.09.2015" & events_2015_later$ort == "Goslar" & events_2015_later$bundesland == "Hessen", ]$bundesland <- "Niedersachsen"
 
+events_2015_later[events_2015_later$ort == "Berlin-Hohenschönhausen",]$ort <- "Neu-Hohenschönhausen, Berlin"
+
+events_2015_later[events_2015_later$ort == "Hohenschönhausen, Berlin" & events_2015_later$datum == "22.12.2015",]$ort <- "Zingster Str./Ribnitzer Str., Berlin"
+
+events_2015_later[events_2015_later$ort == "August",]$ort <- "Augsburg"
+
+events_2015_later[events_2015_later$ort == "Einsiedel",]$ort <- "Einsiedel, Chemnitz"
+
+events_2015_later[events_2015_later$ort == "Merkers",]$ort <- "Merkers-Kieselbach"
+
+events_2015_later[events_2015_later$ort == "Naumburg" & events_2015_later$bundesland == "Sachsen",]$bundesland <- "Sachsen-Anhalt"
+
+events_2015_later[events_2015_later$ort == "Haspe (Hagen)",]$ort <- "Haspe, Hagen"
+
+events_2015_later[events_2015_later$ort == "Marke, Raguhn-Jeßnitz",]$ort <- "Marke"
+
+events_2015_later <- events_2015_later[!(events_2015_later$datum == "31.03.2016" & events_2015_later$ort == "Sebnitz" & events_2015_later$bundesland == "Thüringen"), ]
+
+events_2015_later[events_2015_later$ort == "Leverkusen" & events_2015_later$bundesland == "Niedersachsen",]$bundesland <- "Nordrhein-Westfalen"
+
+events_2015_later <- events_2015_later[!(events_2015_later$datum == "23.01.2016" & events_2015_later$ort == "Nümbrecht" & events_2015_later$bundesland == "Niedersachsen"), ]
+
+events_2015_later[events_2015_later$ort == "Wernberg-Köblitz" & events_2015_later$bundesland == "Berlin",]$bundesland <- "Bayern"
+
 # Due to ambiguity as to whether this event took place in Mainz (RP) or in parts of the city of Wiesbaden (HE)
 # that contain "Mainz", this event is excluded
 events_2015_later <- events_2015_later[!(events_2015_later$datum == "14.11.2015" & events_2015_later$ort == "Mainz" & events_2015_later$bundesland == "Hessen"), ]
@@ -110,6 +135,9 @@ events_2015_later <- events_2015_later[!(events_2015_later$datum == "14.11.2015"
 # locations_unique <- unique(locations)
 # geocodes_2015_later <- ggmap::geocode(locations_unique, output = "all", source = "google", nameType = "long")
 # save(geocodes_2015_later, file = "./data-raw/geocodes_2015_later.Rdata")
+
+# check for missing geocode results:
+# locations_unique[which(sapply(geocodes_2015_later, function(x){x$status == "ZERO_RESULTS"}) == TRUE)]
 
 load("data-raw/geocodes_2015_later.Rdata")
 geocodes_2015_later_df <- ldply(geocodes_2015_later, arvig:::extract_from_geocode) %>%
