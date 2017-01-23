@@ -126,13 +126,14 @@ events_2015_later <- events_2015_later[!(events_2015_later$datum == "23.01.2016"
 
 events_2015_later[events_2015_later$ort == "Wernberg-Köblitz" & events_2015_later$bundesland == "Berlin",]$bundesland <- "Bayern"
 
+
 # Due to ambiguity as to whether this event took place in Mainz (RP) or in parts of the city of Wiesbaden (HE)
 # that contain "Mainz", this event is excluded
 events_2015_later <- events_2015_later[!(events_2015_later$datum == "14.11.2015" & events_2015_later$ort == "Mainz" & events_2015_later$bundesland == "Hessen"), ]
 
 ## geocode all events from 2015
-# locations <- paste(events_2015_later$ort, events_2015_later$bundesland, sep = ", ")
-# locations_unique <- unique(locations)
+locations <- paste(events_2015_later$ort, events_2015_later$bundesland, sep = ", ")
+locations_unique <- unique(locations)
 # geocodes_2015_later <- ggmap::geocode(locations_unique, output = "all", source = "google", nameType = "long")
 # save(geocodes_2015_later, file = "./data-raw/geocodes_2015_later.Rdata")
 
@@ -190,3 +191,10 @@ arvig <- events %>%
 
 
 #save(arvig, file = "./data/arvig.rda")
+
+
+# # fix post-geocoding errors
+# load("./data/arvig.rda")
+# arvig[arvig$location == "Dessau" & arvig$state == "Sachsen" & arvig$date == "2016-06-26",]$state <- "Sachsen-Anhalt"
+# arvig[arvig$location == "Halle an der Saale" & arvig$state == "Sachsen" & arvig$date == "2016-08-03",]$state <- "Sachsen-Anhalt"
+# save(arvig, file = "./data/arvig.rda")
