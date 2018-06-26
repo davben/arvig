@@ -1,19 +1,21 @@
 citHeader("To cite ARVIG in publications use:")
 
-citEntry(entry = "Article",
-  title        = "Refugees Welcome\\? Introducing a New Dataset on Anti-Refugee Violence in Germany, 2014--2015",
-  author       = personList(as.person("David Benček"),
-                            as.person("Julia Strasheim")
-                            ),
-  journal      = "Kiel Working Paper",
+citEntry(entry = "article",
+  title        = "Refugees Welcome? {{A}} Dataset on Anti-Refugee Violence in {{Germany}}",
+  author       = c("David Ben\\v{c}ek", "Julia Strasheim"),
+  copyright    = "\\textcopyright{} The Author(s) 2016. This article is distributed under the terms of the Creative Commons Attribution 3.0 License (http://www.creativecommons.org/licenses/by/3.0/) which permits any use, reproduction and distribution of the work without further permission provided the original work is attributed as specified on the SAGE and Open Access page (https://us.sagepub.com/en-us/nam/open-access-at-sage).",
+  journal      = "Research \\& Politics",
   year         = "2016",
-  volume       = "2032",
-  pages        = "1-14",
-  url          = "https://www.ifw-members.ifw-kiel.de/publications/refugees-welcome-introducing-a-new-dataset-on-anti-refugee-violence-in-germany-201420132015",
+  month        = "oct",
+  volume       = "3",
+  number       = "4",
+  issn         = "2053-1680",
+  pages        = "2053168016679590",
+  doi          = "10.1177/2053168016679590",
 
   textVersion  =
-  paste("Benček, David and Julia Strasheim (2015).",
-        "Refugees Welcome\\? Introducing a New Dataset on Anti-Refugee Violence in Germany, 2014--2015",
-        "Kiel Working Paper 2032, 14",
-        "URL https://www.ifw-members.ifw-kiel.de/publications/refugees-welcome-introducing-a-new-dataset-on-anti-refugee-violence-in-germany-201420132015.")
+  paste("Ben&#x10D;ek, David and Julia Strasheim (2016).",
+        "Refugees Welcome? A Dataset on Anti-Refugee Violence in Germany.",
+        "Research & Politics 3 (4),",
+        "https://doi.org/10.1177/2053168016679590")
 )

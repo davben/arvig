@@ -1,18 +1,27 @@
-# arvig
-Anti-Refugee Violence in Germany
 
-This R data package contains georeferenced information on 1,645 events of anti-refugee violence and social unrest in Germany for the years 2014 and 2015. 
-The `arvig` dataset is based on information published by [Mut Gegen Rechte Gewalt](https://www.mut-gegen-rechte-gewalt.de).
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+arvig -- Anti-Refugee Violence in Germany
+=========================================
 
-For more information read the current working paper [here](https://www.ifw-members.ifw-kiel.de/publications/refugees-welcome-introducing-a-new-dataset-on-anti-refugee-violence-in-germany-201420132015).
+This R data package contains a georeferenced dataset on categorised events of anti-refugee violence and social unrest in Germany from 2014 onwards. `arvig` is based on information published by the civil society project [Mut Gegen Rechte Gewalt](https://www.mut-gegen-rechte-gewalt.de).
 
-Install the package from github with
+For more information read our 2016 background paper
 
-    devtools::install_github("davben/arvig")
+> ["Refugees Welcome? A Dataset on Anti-Refugee Violence in Germany" in *Research & Politics* **3**(4)](http://doi.org/10.1177/2053168016679590).
+
+Installation
+------------
+
+You can install `arvig` from GitHub with
+
+``` r
+# install.packages("devtools")
+devtools::install_github("davben/arvig")
+```
 
 and use the dataset via
 
-    library(arvig)
-    data("arvig")
-	
-You can also download and view the data as a `.csv`-file [here](https://www.ifw-members.ifw-kiel.de/publications/refugees-welcome-introducing-a-new-dataset-on-anti-refugee-violence-in-germany-201420132015/arvig_dataset.csv).
+``` r
+library(arvig)
+data("arvig")
+```

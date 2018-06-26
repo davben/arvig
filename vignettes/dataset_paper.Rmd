@@ -1,0 +1,78 @@
+---
+title: "Replication of original publication"
+author: "David Ben&#x10D;ek and Julia Strasheim"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+We originally published the ARVIG dataset in 2016 and documented it in [@bencek_2016].
+This vignette replicates all figures and tables of the paper.
+
+# Installation
+As we have continually updated the ARVIG dataset and information was also added and corrected retroactively, we first need to install the version of the dataset used in the original publication.
+
+```{r setup}
+#devtools::install_github("davben/arvig", ref = "v16.1.0")
+library(tidyverse)
+library(arvig)
+library(sf)
+```
+
+
+# Overview
+First we can create an overview table distinguishing the different types of events present in the data and listing their frequencies.
+
+```{r frequency-table}
+arvig %>%
+  count(category_en) %>%
+  arrange(desc(n))
+```
+
+A few observations are mapped to more than one event type.
+In order to break those down into the four main categories, `arvig` offers the function `split_events()` that creates additional observations for each category.
+
+```{r split-events}
+arvig_split <- arvig %>%
+  split_events()
+```
+
+
+
+Now we can take a look at the spatial distribution of events across Germany.
+To do this, we can use a district-level shapefile of Germany that is included in the `arvig` package and plot all events based on their geographical coordinates.
+Since the geo-coding is only precise at the level of municipalities, multiple events in the same town or city are plotted on top of one another.
+Adjusting the level of transparency can help visualize repeated event locations (adding a small amount of random noise to the coordinates would be an alternative solution, though one needs to be careful not to misrepresent the data).
+
+```{r overview-map, fig.height=10, fig.width=6}
+load(system.file("extdata", "german_districts.rda", package = "arvig"))
+
+arvig_split %>%
+  ggplot() +
+  geom_sf(data = german_districts, fill = "#cccccc") +
+  geom_point(aes(longitude, latitude, colour = category_en), alpha = 0.4) +
+  scale_color_colorblind() +
+  coord_sf(crs = 4326) +
+  theme_map() +
+  theme(panel.grid.major = element_line(colour = "transparent")) +
+  theme(legend.position = "bottom") +
+  guides(colour = guide_legend(ncol = 2, direction = "horizontal", override.aes = list(alpha = 1),
+                               title = "Event type", title.position = "top", title.hjust = 0.5))
+```
+
+
+Beside the spatial variance temporal clusters of events may also be of interest.
+A histogram of event counts by day helps to get a first impression.
+```{r histogram}
+arvig_split %>%
+  count(date) %>%
+  complete(date = full_seq(date, period = 1), fill = list(n = 0)) %>% # include days with zero observations
+  ggplot(aes(n)) +
+  geom_histogram(binwidth = 1, boundary = -0.5, fill="#E69F00", colour = "black") +
+  labs(x = "Events per day", y = "Count") +
+  theme_bw()
+```
+

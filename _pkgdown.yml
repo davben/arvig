@@ -1,0 +1,14 @@
+templates:
+  params:
+    bootswatch: United
+
+navbar:
+  title: "ARVIG"
+  left:
+    - text: "Overview"
+      href:  articles/arvig.html
+    - text: "Replication"
+      href:  articles/dataset_paper.html
+  right:
+    - icon: fa-github
+      href: https://github.com/davben/arvig

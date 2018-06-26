@@ -1,3 +1,9 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
+^.\docs$
+^README\.Rmd$
+^README-.*\.png$
+^docs$
+^_pkgdown\.yml$
+^doc$
